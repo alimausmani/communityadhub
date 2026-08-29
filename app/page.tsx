@@ -1,47 +1,64 @@
+'use client'
+
+import { useState } from 'react'
+import {
+  AlertTriangle, ArrowUpRight, Bell, Check, ChevronRight, CircleHelp, Clock3,
+  Droplets, Flame, HeartPulse, LocateFixed, MapPin, Menu, MessageCircle,
+  Navigation, Package, Phone, Plus, ShieldCheck, Siren, SlidersHorizontal,
+  Sparkles, TentTree, Truck, Users, Waves, X, Zap
+} from 'lucide-react'
+
+type Tone = 'critical' | 'warning' | 'success' | 'info' | 'purple' | 'yellow'
+
+const requests = [
+  { title: 'Drinking water needed', people: '6 people', place: 'Dharavi', distance: '1.8 km', time: '12 min ago', tone: 'critical' as Tone, icon: Droplets, verified: true },
+  { title: 'Medical assistance required', people: '2 adults', place: 'Sion East', distance: '2.4 km', time: '28 min ago', tone: 'critical' as Tone, icon: HeartPulse, verified: true },
+  { title: 'Food for 8 people', people: '8 people', place: 'Kurla West', distance: '3.1 km', time: '41 min ago', tone: 'warning' as Tone, icon: Package, verified: true },
+]
+
+const centers = [
+  { name: 'Community Relief Center', type: 'Shelter', occupancy: '84 / 120', open: '36 spaces', tone: 'purple' as Tone },
+  { name: 'Sion Medical Camp', type: 'Medical support', occupancy: 'Open now', open: '24/7', tone: 'info' as Tone },
+  { name: 'Kurla Water Point', type: 'Water distribution', occupancy: '1,200L left', open: 'Until 8:00 PM', tone: 'yellow' as Tone },
+]
+
+function Badge({ tone, children }: { tone: Tone; children: React.ReactNode }) {
+  return <span className={`badge badge-${tone}`}><span className="badge-dot" />{children}</span>
+}
+
+function SectionHeading({ eyebrow, title, action }: { eyebrow: string; title: string; action?: string }) {
+  return <div className="section-heading"><div><p className="eyebrow">{eyebrow}</p><h2>{title}</h2></div>{action && <button className="text-button">{action}<ArrowUpRight size={15} /></button>}</div>
+}
+
+function Stat({ value, label, tone }: { value: string; label: string; tone: Tone }) {
+  return <div className="stat"><div className={`stat-icon icon-${tone}`}><Users size={18} /></div><strong>{value}</strong><span>{label}</span></div>
+}
+
+function SosModal({ onClose }: { onClose: () => void }) {
+  const [step, setStep] = useState(1)
+  const [submitted, setSubmitted] = useState(false)
+  const labels = ['Need', 'Urgency', 'Details', 'Location', 'Contact']
+  if (submitted) return <div className="modal-backdrop"><div className="modal success-modal"><button className="close" onClick={onClose}><X /></button><div className="success-check"><Check size={30} /></div><p className="eyebrow">REQUEST RECEIVED</p><h2>Help is on the way.</h2><p className="muted">Your request is pending verification. Nearby helpers have been notified.</p><div className="request-id"><span>Request ID</span><strong>CAH-2849</strong></div><div className="mini-details"><span><Badge tone="critical">Critical</Badge></span><span><MapPin size={15} /> Dharavi, Mumbai</span><span><Clock3 size={15} /> Est. 18 min</span></div><button className="primary full" onClick={onClose}>Back to dashboard</button></div></div>
+  const needs = [{ label: 'Food', icon: Package }, { label: 'Water', icon: Droplets }, { label: 'Medicine', icon: HeartPulse }, { label: 'Shelter', icon: TentTree }, { label: 'Rescue', icon: Siren }, { label: 'Transport', icon: Truck }]
+  return <div className="modal-backdrop"><div className="modal"><button className="close" onClick={onClose}><X /></button><div className="modal-top"><div><p className="eyebrow">SOS REQUEST</p><h2>Tell us what you need</h2></div><span className="step-count">{step} / 5</span></div><div className="progress">{labels.map((label, i) => <div key={label} className={i + 1 <= step ? 'active' : ''}><span>{i + 1}</span><small>{label}</small></div>)}</div>{step === 1 && <><p className="modal-question">What kind of help do you need right now?</p><div className="choice-grid">{needs.map(({ label, icon: Icon }) => <button className="choice" key={label} onClick={() => setStep(2)}><Icon size={22} /><span>{label}</span></button>)}</div></>}{step === 2 && <><p className="modal-question">How urgent is your situation?</p><div className="urgency-options"><button onClick={() => setStep(3)}><Badge tone="critical">Critical</Badge><span>Immediate danger or medical emergency</span></button><button onClick={() => setStep(3)}><Badge tone="warning">High</Badge><span>Need help within the next hour</span></button><button onClick={() => setStep(3)}><Badge tone="success">Normal</Badge><span>Can wait, but support is needed</span></button></div></>}{step === 3 && <div className="form-stack"><label>Describe your situation<textarea placeholder="Tell nearby helpers what is happening..." rows={4} /></label><label>How many people need help?<input placeholder="e.g. 6" /></label><label className="check-row"><input type="checkbox" /> Children, elderly, or person with disability present</label></div>}{step === 4 && <div className="location-box"><div className="fake-map"><div className="map-grid" /><div className="map-pin"><LocateFixed size={18} /></div><span>Dharavi, Mumbai</span></div><button className="secondary full"><LocateFixed size={16} /> Use my current location</button><label>Or enter address<input placeholder="Search a landmark or address" /></label></div>}{step === 5 && <div className="form-stack"><label>Phone number<input placeholder="+91 00000 00000" /></label><label>Preferred contact method<select><option>Phone call</option><option>WhatsApp</option><option>SMS</option></select></label><p className="privacy"><ShieldCheck size={16} /> Your contact details are only shared with your assigned helper.</p></div>}<div className="modal-actions">{step > 1 && <button className="secondary" onClick={() => setStep(step - 1)}>Back</button>}<button className="primary" onClick={() => step === 5 ? setSubmitted(true) : setStep(step + 1)}>{step === 5 ? 'Submit SOS request' : 'Continue'}<ChevronRight size={16} /></button></div></div></div>
+}
+
 export default function Page() {
-  return (
-    <main
-      style={{
-        colorScheme: 'light dark',
-        position: 'relative',
-        display: 'flex',
-        minHeight: '100vh',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'light-dark(#fff, #000)',
-        color: 'light-dark(#000, #fff)',
-      }}
-    >
-      <svg
-        aria-hidden="true"
-        style={{ width: 80, height: 80 }}
-        width={80}
-        height={80}
-        fill="none"
-        viewBox="0 0 20 20"
-        xmlns="http://www.w3.org/2000/svg"
-        stroke="currentColor"
-        strokeWidth="0.5"
-      >
-        <path
-          d="M14.2 14.2H17V6.9375C17 4.76288 15.2371 3 13.0625 3H5.8V5.8M14.2 14.2V7.79063L7.79062 14.2H14.2ZM14.2 14.2V17H6.9375C4.76288 17 3 15.2371 3 13.0625V5.8H5.8M5.8 5.8V12.2313L12.2313 5.8H5.8Z"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <p
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: 'calc(50% + 56px)',
-          transform: 'translateX(-50%)',
-          whiteSpace: 'nowrap',
-          fontSize: '14px',
-          fontWeight: 500,
-          color: 'light-dark(#71717a, #a1a1aa)',
-        }}
-      >
-        Your v0 generation will show here.
-      </p>
-    </main>
-  )
+  const [sosOpen, setSosOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [lowBandwidth, setLowBandwidth] = useState(false)
+  const [mapMode, setMapMode] = useState<'map' | 'heatmap'>('map')
+  const [accepted, setAccepted] = useState<string[]>([])
+  return <main className={lowBandwidth ? 'app low-bandwidth' : 'app'}>
+    <header className="topbar"><div className="brand"><div className="brand-mark"><Waves size={19} /></div><div><strong>Community Aid Hub</strong><span>Local help. Real time.</span></div></div><nav>{['Home', 'Live Map', 'Requests', 'NGOs', 'Relief Centers', 'Donations', 'Impact'].map((item, i) => <a className={i === 0 ? 'selected' : ''} key={item} href={`#${item.toLowerCase().replace(' ', '-')}`}>{item}</a>)}</nav><div className="top-actions"><button className={`bandwidth ${lowBandwidth ? 'on' : ''}`} onClick={() => setLowBandwidth(!lowBandwidth)}><Zap size={15} /> {lowBandwidth ? 'Lite mode on' : 'Low-bandwidth'}</button><button className="icon-button notification" aria-label="Notifications"><Bell size={19} /><i /></button><button className="profile"><span>AS</span><ChevronRight size={15} /></button><button className="menu-button"><Menu /></button></div></header>
+    <div className="incident"><div className="incident-main"><span className="pulse" /><span className="incident-label">ACTIVE INCIDENT</span><strong>Flood Response — Mumbai</strong><span className="incident-time"><Clock3 size={14} /> Updated 2 min ago</span></div><button className="incident-link">View alerts <ArrowUpRight size={14} /></button></div>
+    {lowBandwidth && <div className="lite-banner"><Zap size={15} /> Emergency Lite is active — prioritizing requests, alerts, and contact information.</div>}
+    <section className="hero"><div className="hero-copy"><p className="eyebrow">MUMBAI COMMUNITY RESPONSE · 29 AUG 2026</p><h1>Help is closer<br /><em>than you think.</em></h1><p className="hero-sub">Find help, offer help, and coordinate local disaster response in real time.</p><div className="hero-actions"><button className="sos-button" onClick={() => setSosOpen(true)}><span className="sos-icon"><Siren size={24} /></span><span><b>I NEED HELP</b><small>Send an SOS request</small></span><ArrowUpRight /></button><button className="help-button" onClick={() => setHelpOpen(true)}><span className="help-icon"><Plus size={23} /></span><span><b>I CAN HELP</b><small>Offer resources or time</small></span><ArrowUpRight /></button></div><div className="trust-row"><span><ShieldCheck size={15} /> Verified community network</span><span><Clock3 size={15} /> Response teams active now</span></div></div><div className="hero-visual"><div className="response-card"><div className="response-card-top"><span className="live-dot" /> <span>LIVE RESPONSE NETWORK</span><span className="signal"><i /><i /><i /></span></div><div className="network-map"><div className="roads" /><div className="map-label label-one">Dharavi</div><div className="map-label label-two">Sion</div><div className="map-label label-three">Kurla</div><div className="map-marker marker-red"><Siren size={14} /></div><div className="map-marker marker-green"><Users size={14} /></div><div className="map-marker marker-blue"><ShieldCheck size={14} /></div><div className="map-marker marker-purple"><TentTree size={14} /></div><div className="map-center"><div>342</div><span>helpers active</span></div></div><div className="map-footer"><span><span className="legend-dot red" /> 128 requests</span><span><span className="legend-dot green" /> 342 helpers</span><span><span className="legend-dot blue" /> 18 NGOs</span></div></div></div></section>
+    <section className="stats-section"><div className="stats"><Stat value="128" label="Active requests" tone="critical" /><Stat value="342" label="Available volunteers" tone="success" /><Stat value="18" label="Verified NGOs" tone="info" /><Stat value="12" label="Relief centers" tone="purple" /><Stat value="486" label="Requests fulfilled" tone="yellow" /></div></section>
+    <div className="content"><section><SectionHeading eyebrow="ACT NOW" title="Requests near you" action="View all requests" /><div className="filter-row"><button className="filter-active">All requests</button><button>Critical</button><button>Food & water</button><button>Medical</button><button className="filter-more"><SlidersHorizontal size={15} /> Filters</button></div><div className="request-list">{requests.map((req) => { const Icon = req.icon; const isAccepted = accepted.includes(req.title); return <article className={`request-card ${req.tone}`} key={req.title}><div className="request-icon"><Icon size={19} /></div><div className="request-body"><div className="request-title"><Badge tone={req.tone}>{req.tone === 'critical' ? 'Critical' : 'High priority'}</Badge>{req.verified && <span className="verified"><ShieldCheck size={14} /> Verified</span>}</div><h3>{req.title}</h3><p><Users size={14} /> {req.people} <span>·</span> <MapPin size={14} /> {req.place} <span>·</span> {req.distance}</p><small><Clock3 size={13} /> {req.time}</small></div><button className={isAccepted ? 'accepted' : 'outline-button'} onClick={() => setAccepted([...accepted, req.title])}>{isAccepted ? <><Check size={15} /> Accepted</> : 'Help here'}<ChevronRight size={15} /></button></article>})}</div></section><aside className="side-column"><SectionHeading eyebrow="LOCAL SIGNAL" title="Response pulse" /><div className="pulse-card"><div className="pulse-header"><div><strong>Demand is rising</strong><span>Last 60 minutes</span></div><span className="trend">+18.4%</span></div><div className="bar-chart">{[38, 55, 44, 66, 49, 72, 63, 88, 78, 94, 82, 100].map((h, i) => <i style={{ height: `${h}%` }} key={i} />)}</div><div className="chart-labels"><span>11:00</span><span>11:30</span><span>12:00</span></div></div><div className="alert-card"><div className="alert-symbol"><AlertTriangle size={18} /></div><div><Badge tone="warning">Flood warning</Badge><strong>Road access limited in Kurla</strong><p>Use SCLR route where possible. Mumbai Emergency Operations · 8 min ago</p></div><ChevronRight size={16} /></div></aside></div>
+    <section className="map-section"><SectionHeading eyebrow="HYPER-LOCAL COORDINATION" title="See what is happening nearby" action="Open full map" /><div className="map-toolbar"><div className="segmented"><button className={mapMode === 'map' ? 'active' : ''} onClick={() => setMapMode('map')}><MapPin size={15} /> Map</button><button className={mapMode === 'heatmap' ? 'active' : ''} onClick={() => setMapMode('heatmap')}><Flame size={15} /> Demand heatmap</button></div><div className="map-filters"><span className="filter-label">Show:</span><Badge tone="critical">Critical</Badge><Badge tone="success">Helpers</Badge><Badge tone="info">NGOs</Badge><Badge tone="purple">Shelters</Badge></div></div><div className={`large-map ${mapMode}`}><div className="map-water" /><div className="large-roads" /><div className="zone zone-a" /><div className="zone zone-b" /><div className="zone zone-c" /><span className="map-place p1">Dharavi</span><span className="map-place p2">Sion</span><span className="map-place p3">Kurla</span><span className="map-place p4">Mahim</span>{[{ c: 'critical', x: '23%', y: '37%', label: '6' }, { c: 'critical', x: '49%', y: '58%', label: '2' }, { c: 'success', x: '67%', y: '32%', label: '14' }, { c: 'info', x: '75%', y: '68%', label: 'NGO' }, { c: 'purple', x: '38%', y: '22%', label: '36' }].map((m, i) => <div className={`large-marker ${m.c}`} style={{ left: m.x, top: m.y }} key={i}>{m.c === 'critical' ? <Siren size={15} /> : m.c === 'success' ? <Users size={15} /> : m.c === 'info' ? <ShieldCheck size={15} /> : <TentTree size={15} />}<span>{m.label}</span></div>)}<div className="map-key"><strong>{mapMode === 'heatmap' ? 'Demand intensity' : 'Live map'}</strong><span><i className="key-low" /> Low</span><span><i className="key-med" /> Medium</span><span><i className="key-high" /> High</span></div></div></section>
+    <section className="lower-grid"><div><SectionHeading eyebrow="PLACES TO GO" title="Relief centers open now" action="View all centers" /><div className="center-grid">{centers.map((center) => <div className="center-card" key={center.name}><div className={`center-icon icon-${center.tone}`}><TentTree size={19} /></div><Badge tone={center.tone}>{center.type}</Badge><h3>{center.name}</h3><p><MapPin size={14} /> 2.1 km away</p><div className="capacity"><span>{center.occupancy}</span><strong>{center.open}</strong></div><button className="text-button">Get directions <Navigation size={14} /></button></div>)}</div></div><div><SectionHeading eyebrow="TRUST IN ACTION" title="Relief impact" action="See full impact" /><div className="impact-card"><div className="impact-head"><div><span>Total relief delivered</span><strong>₹5.2L</strong></div><div className="impact-ring"><b>62%</b><small>of goal</small></div></div><div className="impact-progress"><i /></div><div className="impact-list"><span><Package size={15} /> 1,240 meals <b>provided</b></span><span><Droplets size={15} /> 3,500L water <b>distributed</b></span><span><HeartPulse size={15} /> 186 kits <b>delivered</b></span></div><button className="secondary full">Where your money goes <ArrowUpRight size={15} /></button></div></div></section>
+    <footer><div className="footer-brand"><div className="brand-mark"><Waves size={17} /></div><strong>Community Aid Hub</strong></div><span>Built for the moments that matter.</span><div className="footer-links"><a>Privacy</a><a>Safety</a><a>Contact</a></div></footer>
+    {sosOpen && <SosModal onClose={() => setSosOpen(false)} />}{helpOpen && <div className="modal-backdrop"><div className="modal helper-modal"><button className="close" onClick={() => setHelpOpen(false)}><X /></button><p className="eyebrow">OFFER SUPPORT</p><h2>How would you like to help?</h2><p className="muted">Choose the way you can make a difference in your neighborhood today.</p><div className="helper-options"><button onClick={() => setHelpOpen(false)}><Users size={23} /><strong>Individual volunteer</strong><span>Offer your time and skills</span></button><button onClick={() => setHelpOpen(false)}><Package size={23} /><strong>Offer resources</strong><span>Food, water, transport, or supplies</span></button><button onClick={() => setHelpOpen(false)}><ShieldCheck size={23} /><strong>NGO or organization</strong><span>Coordinate an existing relief effort</span></button></div><button className="secondary full" onClick={() => setHelpOpen(false)}>Maybe later</button></div></div>}
+  </main>
 }
